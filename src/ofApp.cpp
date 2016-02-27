@@ -47,8 +47,20 @@ void ofApp::setup() {
     defaultFace.load("/Users/joey/Documents/of_v0.9.2_osx_release/apps/myApps/FaceSubstitution/FaceSubstitution-master/FaceSubstitution/bin/data/defaultFace/default.jpg");
     
     //mask setup
+    blackOnTop.load("black.png");
+    brush.load("faceCircle.png");
     
-    ///asdfasdfasdf
+    circleMaskFbo.allocate(cam.getWidth(), cam.getHeight());
+    displayCircleFbo.allocate(cam.getWidth(), cam.getHeight());
+    
+    circleMaskFbo.begin();
+    ofClear(0,0,0,255);
+    circleMaskFbo.end();
+    
+    displayCircleFbo.begin();
+    ofClear(0, 0, 0, 255);
+    displayCircleFbo.end();
+    
 }
 
 void ofApp::update() {
@@ -92,14 +104,42 @@ void ofApp::draw() {
     ofSetColor(255);
     
 	if(src.getWidth() > 0 && cloneReady) {
-		clone.draw(0, 0);
-  
-        //mirrored video output
-//        cam.draw(cam.getWidth(), 0, -cam.getWidth(), cam.getHeight());
-        //cam.draw(0, 0);
+		//clone.draw(0, 0);
         
         ofRectangle faceBox(camTracker.getPosition().x - camTracker.getScale() * 30, camTracker.getPosition().y - camTracker.getScale() * 30,
                             camTracker.getScale() * 60, camTracker.getScale() * 60);
+  
+        //alpha masking
+        circleMaskFbo.begin();
+        ofClear(0, 0, 0, 0); //might need to be 0,0,0,0
+        brush.draw(camTracker.getPosition().x - camTracker.getScale() * 25, camTracker.getPosition().y - camTracker.getScale() * 25,
+                   camTracker.getScale() * 50, camTracker.getScale() * 50);
+        
+        circleMaskFbo.end();
+        
+        //shader masking
+        displayCircleFbo.begin();
+        ofClear(0, 0, 0, 0);
+        
+        shader.begin();
+        shader.setUniformTexture("maskTex", circleMaskFbo.getTexture(), 1);
+        
+        clone.draw(0, 0); //background first
+//        cam.draw(0,0);
+        
+        
+        shader.end();
+        displayCircleFbo.end();
+        
+        blackOnTop.draw(0, 0);
+        
+        displayCircleFbo.draw(0, 0);
+        
+        
+        //mirrored video output
+//        cam.draw(cam.getWidth(), 0, -cam.getWidth(), cam.getHeight());
+        //cam.draw(0, 0)
+        
         
         //ofDrawRectangle(faceBox);
         

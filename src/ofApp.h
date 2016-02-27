@@ -40,11 +40,14 @@ public:
     int frameWhenFaceWasLost;
     bool faceHasBeenSaved = false;
     
+    //testing for face before saving pic
     ofxFaceTracker faceSaverTester;
     ofImage defaultFace;
     
+    //alpha masking
     ofFbo circleMaskFbo;
     ofFbo displayCircleFbo;
     ofShader shader;
     ofImage blackOnTop;
+    ofImage brush;
 };
